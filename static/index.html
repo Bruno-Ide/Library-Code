@@ -1,0 +1,302 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Library Code</title>
+<script src="https://unpkg.com/lucide@0.468.0/dist/umd/lucide.min.js"></script>
+<style>
+/* Mononoki (OFL-1.1), servida pela CDN do Fontsource/jsDelivr */
+@font-face{font-family:"Mononoki";font-style:normal;font-weight:400;font-display:swap;src:url("https://cdn.jsdelivr.net/fontsource/fonts/mononoki@latest/latin-400-normal.woff2") format("woff2"),url("https://cdn.jsdelivr.net/fontsource/fonts/mononoki@latest/latin-400-normal.woff") format("woff")}
+:root{
+  --bg:#00093d; --card:#0a1352; --campo:#00062e; --ink:#e8e8e8; --mute:#a7aed8; --line:#2a3685;
+  --btn:#515eaa; --btn-h:#434f94; --btn-ink:#e8e8e8; --link:#b7c0ff; --warn:#ff9aa5;
+  --mono:ui-monospace,"SFMono-Regular","Cascadia Mono",Menlo,Consolas,"Liberation Mono",monospace;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.55 var(--mono)}
+h1,h2,h3{margin:0;font-weight:600}
+.wrap{max-width:1120px;margin:0 auto;padding:20px 20px 56px}
+svg.lucide{width:1.1em;height:1.1em;vertical-align:-.15em;flex:none}
+
+/* cabeçalho: menu à esquerda, título centralizado */
+header{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:12px;margin-bottom:28px}
+h1{font-family:"Mononoki",var(--mono);font-size:clamp(1.8rem,5vw,2.8rem);letter-spacing:.02em;text-align:center;font-weight:400}
+.quem{justify-self:end;color:var(--mute);font-size:.85rem;display:flex;gap:6px;align-items:center}
+
+button,select,textarea,input{font:inherit;color:inherit}
+button{cursor:pointer;border:1px solid var(--line);background:transparent;padding:8px 14px;border-radius:6px;display:inline-flex;align-items:center;gap:8px;justify-content:center}
+button:hover{background:rgba(81,94,170,.22)}
+button.primary{background:var(--btn);color:var(--btn-ink);border-color:var(--btn);font-weight:600}
+button.primary:hover{background:var(--btn-h);border-color:var(--btn-h)}
+button.danger{color:var(--warn);border-color:rgba(255,154,165,.4)}
+button.icone{padding:8px}
+:focus-visible{outline:3px solid var(--link);outline-offset:2px}
+
+.busca{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:16px}
+.busca label{font-weight:600;display:block;margin-bottom:6px}
+textarea,select,input{width:100%;border:1px solid var(--line);background:var(--campo);border-radius:6px;padding:9px 10px}
+textarea{min-height:76px;resize:vertical}
+.acoes{display:flex;gap:10px;align-items:center;margin-top:10px;flex-wrap:wrap}
+.acoes small{color:var(--mute)}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px;font-size:.88rem}
+.chip{padding:2px 10px;border-radius:99px;background:var(--btn);color:var(--btn-ink)}
+.chip.rel{background:transparent;color:var(--mute);border:1px dashed var(--mute)}
+.chips .rotulo{color:var(--mute);align-self:center}
+
+#titulo{margin:28px 0 8px;font-size:1.1rem;color:var(--mute);font-weight:400}
+
+/* categorias agrupadas */
+.grupo{border-bottom:1px solid var(--line)}
+.grupo summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:12px;padding:14px 4px;font-size:1.05rem;font-weight:600}
+.grupo summary::-webkit-details-marker{display:none}
+.grupo summary:hover{background:rgba(81,94,170,.12)}
+.grupo summary .ico{display:grid;place-items:center;width:34px;height:34px;border-radius:8px;background:var(--btn);color:var(--btn-ink)}
+.grupo summary .qtd{margin-left:auto;color:var(--mute);font-weight:400;font-size:.88rem}
+.grupo summary .seta{transition:transform .2s;color:var(--mute)}
+.grupo[open] summary .seta{transform:rotate(180deg)}
+
+/* blocos espalhados: largura, deslocamento e inclinação variam por módulo (ver sorteio() no script) */
+.blocos{display:flex;flex-wrap:wrap;align-items:flex-start;gap:14px 20px;padding:10px 4px 30px}
+.bloco{width:min(100%,calc(var(--w)*1ch));margin-left:calc(var(--ml)*1px);margin-top:calc(var(--mt)*1px);transform:rotate(calc(var(--r)*1deg));
+  text-align:left;display:block;padding:12px 14px;background:var(--card);border:1px solid var(--line);border-left:5px solid var(--cat);border-radius:4px 10px 10px 4px;transition:transform .15s,background .15s}
+.bloco:hover{transform:rotate(0) translateY(-3px);background:#101b66}
+.bloco .n{font-weight:600;overflow-wrap:anywhere}
+.sub{color:var(--mute);font-size:.84rem;overflow-wrap:anywhere}
+.barra{height:4px;background:var(--line);border-radius:2px;margin-top:8px}.barra i{display:block;height:100%;background:var(--btn);border-radius:2px}
+.ach{font-size:.78rem;color:var(--mute);margin-top:4px}
+@media(max-width:640px){.bloco{margin-left:calc(var(--ml)*.4px);margin-top:0;transform:rotate(calc(var(--r)*.5deg))}}
+@media(prefers-reduced-motion:reduce){.bloco,.grupo summary .seta{transition:none}.bloco{transform:none}}
+
+dl{display:grid;grid-template-columns:110px 1fr;gap:8px 12px;margin:16px 0}
+dt{color:var(--mute)}dd{margin:0;overflow-wrap:anywhere}
+a{color:var(--link)}
+.vazio{color:var(--mute);padding:12px 0}
+
+dialog{border:1px solid var(--line);border-radius:10px;background:var(--card);color:var(--ink);width:min(560px,94vw);padding:20px;max-height:92vh}
+dialog::backdrop{background:rgba(0,3,25,.7)}
+.topo{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.campo{margin-bottom:10px}.campo label{display:block;font-size:.88rem;color:var(--mute);margin-bottom:2px}
+.erro{color:var(--warn);min-height:1.4em;font-size:.9rem}
+
+/* menu lateral */
+#menu{margin:0;height:100dvh;max-height:none;width:min(340px,92vw);border-radius:0 10px 10px 0;border-left:0}
+#menu .corpo{display:grid;gap:14px;margin-top:20px}
+.perfil{display:flex;gap:12px;align-items:center;padding:12px;border:1px solid var(--line);border-radius:8px;background:var(--campo)}
+.perfil .avatar{width:42px;height:42px;border-radius:50%;background:var(--btn);display:grid;place-items:center}
+.perfil b{display:block}
+.nota{color:var(--mute);font-size:.85rem;margin:0}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div><button id="abrirMenu" aria-label="Abrir menu"><i data-lucide="menu"></i><span>Menu</span></button></div>
+    <h1>Library Code</h1>
+    <div class="quem" id="quem" hidden></div>
+  </header>
+
+  <section class="busca">
+    <label for="texto">Descreva o que você precisa construir</label>
+    <textarea id="texto" placeholder="Ex.: quero receber pagamentos por PIX e avisar o cliente por e-mail"></textarea>
+    <div class="acoes"><button id="buscar" class="primary"><i data-lucide="search"></i>Buscar módulos</button><button id="limpar">Limpar</button><small>Ctrl + Enter também busca</small></div>
+    <div id="chips" class="chips" aria-live="polite"></div>
+  </section>
+
+  <h2 id="titulo"></h2>
+  <div id="grupos"></div>
+</div>
+
+<!-- menu lateral com login -->
+<dialog id="menu">
+  <div class="topo"><h2>Menu</h2><button id="fecharMenu" class="icone" aria-label="Fechar menu"><i data-lucide="x"></i></button></div>
+  <div class="corpo" id="menuCorpo"></div>
+</dialog>
+
+<!-- ficha do módulo -->
+<dialog id="dlgFicha">
+  <div class="topo"><span></span><button id="fecharFicha" class="icone" aria-label="Fechar"><i data-lucide="x"></i></button></div>
+  <article id="ficha"></article>
+</dialog>
+
+<!-- formulário de módulo -->
+<dialog id="dlg">
+  <form id="form">
+    <h2 id="dlgTitulo"></h2>
+    <div class="campo"><label for="f_nome">Nome</label><input id="f_nome" required></div>
+    <div class="campo"><label for="f_descricao">Descrição</label><textarea id="f_descricao" required></textarea></div>
+    <div class="campo"><label for="f_id_categoria">Categoria</label><select id="f_id_categoria"></select></div>
+    <div class="campo"><label for="f_tecnologia">Tecnologia</label><input id="f_tecnologia"></div>
+    <div class="campo"><label for="f_versao">Versão</label><input id="f_versao"></div>
+    <div class="campo"><label for="f_status">Status</label><select id="f_status"><option>Ativo</option><option>Inativo</option></select></div>
+    <div class="campo"><label for="f_link">Link</label><input id="f_link" type="url" placeholder="https://"></div>
+    <div class="campo"><label for="f_documentacao">Documentação</label><input id="f_documentacao" type="url" placeholder="https://"></div>
+    <div class="campo"><label for="f_id_usuario">Criado por</label><select id="f_id_usuario"></select></div>
+    <div class="erro" id="erro" role="alert"></div>
+    <div class="acoes"><button class="primary"><i data-lucide="save"></i>Salvar módulo</button><button type="button" id="cancelar">Cancelar</button></div>
+  </form>
+</dialog>
+
+<script>
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const icones = () => window.lucide && lucide.createIcons();
+const semAcento = s => String(s || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+
+// ícone lucide por categoria (categorias novas usam "folder")
+const ICONES = {seguranca:"shield-check", pagamentos:"credit-card", comunicacao:"message-square", arquivos:"folder-open",
+  usuarios:"users", relatorios:"file-text", "banco de dados":"database", integracoes:"plug", autenticacao:"key-round",
+  "e-commerce":"shopping-cart", agendamento:"calendar-days", localizacao:"map-pin", auditoria:"clipboard-list",
+  interface:"layout-dashboard", busca:"search"};
+const iconeDe = nome => ICONES[semAcento(nome)] || "folder";
+const corCat = id => `hsl(${(id * 47) % 360} 60% 66%)`;
+
+// sorteio determinístico por módulo: o "acaso" é o mesmo a cada carregamento
+const sorteio = (id, k) => { const x = Math.sin(id * 12.9898 + k * 78.233) * 43758.5453; return x - Math.floor(x); };
+const estiloBloco = m => `--w:${Math.round(24 + sorteio(m.id, 1) * 22)};--ml:${Math.round(sorteio(m.id, 2) * 56)};--mt:${Math.round(sorteio(m.id, 3) * 30)};--r:${(sorteio(m.id, 4) * 2.4 - 1.2).toFixed(2)};--cat:${corCat(m.id_categoria)}`;
+
+const api = async (url, opts) => {
+  const tk = sessionStorage.getItem("token");
+  const r = await fetch(url, opts && {...opts, headers: {"Content-Type": "application/json", ...(tk && {Authorization: "Bearer " + tk})}, body: opts.body && JSON.stringify(opts.body)});
+  if (r.status === 204) return null;
+  const d = await r.json(); if (!r.ok) throw new Error(d.erro || "Falha na requisição."); return d;
+};
+const CAMPOS = ["nome","descricao","id_categoria","tecnologia","versao","status","link","documentacao","id_usuario"];
+let protegido = false, cats = [], users = [], itens = [], buscando = false, selecionado = null, editando = null, abertas = new Set();
+const usuarioLogado = () => { try { return JSON.parse(sessionStorage.getItem("usuario")); } catch { return null; } };
+const editor = () => !!usuarioLogado();
+
+/* ---------- menu + login ---------- */
+function pintarMenu() {
+  const u = usuarioLogado();
+  $("quem").hidden = !u; $("quem").innerHTML = u ? `<i data-lucide="user-round"></i>${esc(u.usuario)}` : "";
+  $("menuCorpo").innerHTML = u ? `
+    <div class="perfil"><div class="avatar"><i data-lucide="user-round"></i></div><div><b>${esc(u.profissional)}</b><span class="sub">@${esc(u.usuario)} · ${esc(u.cargo)}</span></div></div>
+    <p class="nota">Modo editor ativo: você pode adicionar, editar e excluir módulos.</p>
+    <button id="novo" class="primary"><i data-lucide="plus"></i>Novo módulo</button>
+    <button id="sair"><i data-lucide="log-out"></i>Sair</button>` : `
+    <p class="nota">Entre para adicionar ou alterar módulos. Para apenas consultar, não precisa de login.</p>
+    <form id="formLogin" class="corpo" style="margin:0">
+      <div class="campo"><label for="l_usuario">Usuário</label><input id="l_usuario" autocomplete="username" autocapitalize="none" required></div>
+      <div class="campo"><label for="l_senha">Senha</label><input id="l_senha" type="password" autocomplete="current-password" ${protegido ? "required" : ""}></div>
+      ${protegido ? "" : '<p class="nota">Modo local: qualquer senha é aceita.</p>'}
+      <div class="erro" id="erroLogin" role="alert"></div>
+      <button class="primary"><i data-lucide="log-in"></i>Entrar</button>
+    </form>`;
+  icones();
+  if (u) {
+    $("novo").onclick = () => { $("menu").close(); abrir(null); };
+    $("sair").onclick = () => { sessionStorage.clear(); pintarMenu(); $("menu").close(); $("dlgFicha").close(); };
+  } else {
+    $("formLogin").onsubmit = async e => {
+      e.preventDefault();
+      try {
+        const senha = $("l_senha").value;
+        const d = await api("/api/login", {method: "POST", body: {usuario: $("l_usuario").value, senha}});
+        sessionStorage.setItem("token", senha); sessionStorage.setItem("usuario", JSON.stringify(d.usuario)); pintarMenu();
+      } catch (err) { $("erroLogin").textContent = err.message; }
+    };
+  }
+}
+$("abrirMenu").onclick = () => { pintarMenu(); $("menu").showModal(); };
+$("fecharMenu").onclick = () => $("menu").close();
+$("menu").onclick = e => { if (e.target === $("menu")) $("menu").close(); };
+
+/* ---------- dados ---------- */
+async function init() {
+  protegido = (await api("/api/config")).protegido; pintarMenu();
+  [cats, users] = await Promise.all([api("/api/categorias"), api("/api/usuarios")]);
+  $("f_id_categoria").innerHTML = cats.map(c => `<option value="${c.id}">${esc(c.nome)}</option>`).join("");
+  $("f_id_usuario").innerHTML = `<option value="">—</option>` + users.map(u => `<option value="${u.id}">${esc(u.profissional)}</option>`).join("");
+  carregar();
+}
+
+async function carregar() {
+  buscando = false; $("chips").innerHTML = "";
+  itens = await api("/api/modulos");
+  $("titulo").textContent = `${itens.length} módulos em ${new Set(itens.map(m => m.id_categoria)).size} categorias`; desenhar();
+}
+
+async function buscar() {
+  const texto = $("texto").value.trim(); if (!texto) return carregar();
+  const d = await api("/api/busca", {method: "POST", body: {texto}});
+  buscando = true; itens = d.resultados; abertas = new Set(itens.map(m => m.id_categoria));
+  $("chips").innerHTML = d.palavras_chave.length
+    ? `<span class="rotulo">Palavras-chave:</span>` + d.palavras_chave.map(p => `<span class="chip">${esc(p)}</span>`).join("")
+      + (d.relacionadas.length ? `<span class="rotulo">Também considerei:</span>` + d.relacionadas.slice(0, 10).map(p => `<span class="chip rel">${esc(p)}</span>`).join("") : "")
+    : `<span class="rotulo">Não encontrei palavras-chave. Descreva com um pouco mais de detalhe.</span>`;
+  $("titulo").textContent = d.total ? `${d.total} módulos compatíveis` : "Nenhum módulo compatível"; desenhar();
+}
+
+function desenhar() {
+  // agrupa por categoria: na listagem normal segue a ordem das categorias; na busca, a do melhor resultado
+  const por = new Map(); itens.forEach(m => { if (!por.has(m.id_categoria)) por.set(m.id_categoria, []); por.get(m.id_categoria).push(m); });
+  const grupos = buscando ? [...por] : [...por].sort((a, b) => a[0] - b[0]);
+  $("grupos").innerHTML = grupos.length ? grupos.map(([cid, ms]) => `
+    <details class="grupo" data-cat="${cid}" ${abertas.has(cid) ? "open" : ""}>
+      <summary><span class="ico"><i data-lucide="${iconeDe(ms[0].categoria)}"></i></span>${esc(ms[0].categoria)}
+        <span class="qtd">${ms.length} ${ms.length === 1 ? "módulo" : "módulos"}</span><i class="seta" data-lucide="chevron-down"></i></summary>
+      <div class="blocos">${ms.map(m => `
+        <button class="bloco" data-id="${m.id}" style="${estiloBloco(m)}">
+          <div class="n">${esc(m.nome)}</div><div class="sub">${esc(m.tecnologia) || "—"}</div>
+          ${buscando ? `<div class="barra"><i style="width:${m.relevancia}%"></i></div><div class="ach">${m.encontrados.map(e => esc(e.termo) + (e.relacionado ? " (relacionado)" : "")).join(", ")}</div>` : ""}
+        </button>`).join("")}</div>
+    </details>`).join("") : `<p class="vazio">Nenhum módulo por aqui. Tente outras palavras.</p>`;
+  icones();
+}
+$("grupos").addEventListener("toggle", e => { const c = +e.target.dataset.cat; e.target.open ? abertas.add(c) : abertas.delete(c); }, true);
+
+/* ---------- ficha ---------- */
+async function ficha(id) {
+  selecionado = id;
+  const m = await api(`/api/modulos/${id}`);
+  const lk = u => u ? `<a href="${esc(u)}" target="_blank" rel="noopener noreferrer">${esc(u)}</a>` : "—";
+  $("ficha").innerHTML = `<h2><span style="color:${corCat(m.id_categoria)}"><i data-lucide="${iconeDe(m.categoria)}"></i></span> ${esc(m.nome)}</h2><dl>
+    <dt>Categoria</dt><dd>${esc(m.categoria)}</dd><dt>Descrição</dt><dd>${esc(m.descricao)}</dd>
+    <dt>Tecnologia</dt><dd>${esc(m.tecnologia) || "—"}</dd><dt>Versão</dt><dd>${esc(m.versao) || "—"}</dd>
+    <dt>Status</dt><dd>${esc(m.status)}</dd><dt>Link</dt><dd>${lk(m.link)}</dd>
+    <dt>Documentação</dt><dd>${lk(m.documentacao)}</dd><dt>Criado por</dt><dd>${esc(m.criado_por) || "—"}</dd></dl>
+    ${editor() ? '<div class="acoes"><button id="editar"><i data-lucide="pencil"></i>Editar</button><button id="apagar" class="danger"><i data-lucide="trash-2"></i>Excluir</button></div>' : ""}`;
+  icones(); if (!$("dlgFicha").open) $("dlgFicha").showModal();
+  if (!editor()) return;
+  $("editar").onclick = () => { $("dlgFicha").close(); abrir(m); };
+  $("apagar").onclick = async () => {
+    if (!confirm(`Excluir o módulo "${m.nome}"?`)) return;
+    try { await api(`/api/modulos/${m.id}`, {method: "DELETE"}); } catch (err) { return alert(err.message); }
+    selecionado = null; $("dlgFicha").close(); await recarregar();
+  };
+}
+$("fecharFicha").onclick = () => $("dlgFicha").close();
+$("dlgFicha").onclick = e => { if (e.target === $("dlgFicha")) $("dlgFicha").close(); };
+
+async function recarregar() {
+  cats = await api("/api/categorias"); buscando && $("texto").value.trim() ? buscar() : carregar();
+}
+
+/* ---------- formulário ---------- */
+function abrir(m) {
+  editando = m ? m.id : null; $("erro").textContent = "";
+  $("dlgTitulo").textContent = m ? "Editar módulo" : "Novo módulo";
+  CAMPOS.forEach(c => $("f_" + c).value = m ? (m[c] ?? "") : (c === "status" ? "Ativo" : ""));
+  if (!m && usuarioLogado()) $("f_id_usuario").value = usuarioLogado().id;
+  $("dlg").showModal();
+}
+$("form").onsubmit = async e => {
+  e.preventDefault();
+  const body = Object.fromEntries(CAMPOS.map(c => [c, $("f_" + c).value || null]));
+  body.id_categoria = +body.id_categoria; body.id_usuario = body.id_usuario ? +body.id_usuario : null;
+  try {
+    const m = await api(editando ? `/api/modulos/${editando}` : "/api/modulos", {method: editando ? "PUT" : "POST", body});
+    $("dlg").close(); abertas.add(m.id_categoria); await recarregar(); ficha(m.id);
+  } catch (err) { $("erro").textContent = err.message; }
+};
+$("grupos").onclick = e => { const b = e.target.closest("button[data-id]"); if (b) ficha(+b.dataset.id); };
+$("buscar").onclick = buscar;
+$("limpar").onclick = () => { $("texto").value = ""; abertas.clear(); carregar(); };
+$("texto").onkeydown = e => { if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) buscar(); };
+$("cancelar").onclick = () => $("dlg").close();
+window.addEventListener("load", icones);
+init();
+</script>
+</body>
+</html>
